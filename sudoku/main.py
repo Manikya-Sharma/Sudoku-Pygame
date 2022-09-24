@@ -1,14 +1,19 @@
+
+# TODO: Add Block Condition
+
 import pygame
 from settings import Constants
 from start_screen import Start
 from level import Level
 
+
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.display.set_caption("SUDOKU")
         self.c = Constants(True)
         self.screen = pygame.display.set_mode((self.c.d['SCREEN_WIDTH'],
-                        self.c.d['SCREEN_HEIGHT']))
+                                               self.c.d['SCREEN_HEIGHT']))
         self.running = True
         self.initialize = True
         self.start = Start()
@@ -31,6 +36,7 @@ class Game:
                     self.end_game()
             pygame.display.update()
         pygame.quit()
+
 
 if __name__ == "__main__":
     game = Game()
