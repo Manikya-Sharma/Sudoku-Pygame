@@ -5,6 +5,104 @@ from settings import Constants
 
 
 class Board:
+    """
+    *    METHOD OF PATHWAYS
+        To get 3 blocks satisfying the block, row and column condition
+
+    *     1.                    2.
+
+    *     [•]   []   []         [•]   []   []
+
+    *     []   [•]   []         []   []   [•]
+
+    *     []   []   [•]         []   [•]   []
+    """
+
+    @staticmethod
+    def get_final_three_blocks(ex_row_1, ex_row_2, ex_row_3, ex_row_4, ex_row_5, ex_row_6):
+        row_7 = []
+        row_8 = []
+        row_9 = []
+        array = [row_7, row_8, row_9]
+
+        for i in range(9):
+            ex_elements_in_column = Board.access_column([ex_row_1, ex_row_2,
+                                    ex_row_3, ex_row_4, ex_row_5, ex_row_6], i)
+            required_elements = Board.get_sub_list([1,2,3,4,5,6,7,8,9],ex_elements_in_column)
+
+            shuffle(required_elements)
+            # Will always satisfy column, row and block condition!
+            Board.set_column_in_array(array, required_elements, i)
+
+        return row_7, row_8, row_9
+
+
+    @staticmethod
+    def pathways_with_columns(lis, ex_row_1, ex_row_2, ex_row_3):
+        return
+
+    @staticmethod
+    def pathways(lis):
+        return
+
+    # Miscellaneous Functions
+    @staticmethod
+    def get_sub_list(given_list, remove_list):
+        for elem in remove_list:
+            if elem in given_list:
+                given_list.remove(elem)
+        return given_list
+
+    @staticmethod
+    def access_column(array, column):
+        lis = []
+        for row in array:
+            lis.append(row[column])
+        return lis
+
+    @staticmethod
+    def set_column_in_array(existing_array, elements_list, column):
+        # list is by default mutable type so call by reference
+        i = 0
+        for row in existing_array:
+            try:
+                row[column] = elements_list[i]
+            except IndexError:
+                row.insert(column, elements_list[i])
+            i += 1
+
+    @staticmethod
+    def get_sudoku_array():
+        STANDARD_LIST = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        # Get first row
+        row_1 = STANDARD_LIST
+        shuffle(row_1)
+
+        # Get the 3 blocks through pathways
+        row_2, row_3 = Board.pathways(row_1)
+
+        # Get the fourth row using randomization
+        row_4 = []
+        existing = []
+        for i in range(9):
+            required_list = Board.get_sub_list(
+                STANDARD_LIST, [row_1[i], row_2[i], row_3[i]])
+            new_elem = choice(required_list)
+            while new_elem in existing:
+                new_elem = choice(required_list)
+            row_4.insert(i, new_elem)
+            existing.append(new_elem)
+
+        # Using pathways with column condition for row 5 and row 6
+        row_5, row_6 = Board.pathways_with_columns(row_4, row_1, row_2, row_3)
+
+        # Using method of remaining numbers to determine row 7,8 and 9
+        row_7, row_8, row_9 = Board.get_final_3_blocks(
+            row_1, row_2, row_3, row_4, row_5, row_6)
+
+        final = [row_1, row_2, row_3, row_4, row_5, row_6, row_7, row_8, row_9]
+        return final
+
     @staticmethod
     def initialize_cells():
         # Number of defaults
@@ -12,28 +110,9 @@ class Board:
         num_given = c.d["DIFFICULTY"]
         num_done = 0
 
-        # Allocating numbers
-        final = []
-        for _ in range(9):   # Each row
-            valid = False
-            while not valid:
-                row = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-                shuffle(row)
-                for existing in final:
-                    break_for = False
-                    for i in range(9):
-                        if existing[i] == row[i]:
-                            valid = False
-                            break_for = True
-                            break
-                    else:
-                        valid = True
-                        break_for = False
-                    if break_for:
-                        break
-                else:
-                    valid = True
-            final.append(row)
+        # ? # Allocating numbers
+        final = Board.get_sudoku_array()
+        # Creating the corresponding cells
         i = 1
         while i <= 9:
             j = 1
