@@ -27,8 +27,10 @@ class Board:
 
         for i in range(9):
             ex_elements_in_column = Board.access_column([ex_row_1, ex_row_2,
-                                    ex_row_3, ex_row_4, ex_row_5, ex_row_6], i)
-            required_elements = Board.get_sub_list([1,2,3,4,5,6,7,8,9],ex_elements_in_column)
+                                                         ex_row_3, ex_row_4,
+                                                         ex_row_5, ex_row_6], i)
+            required_elements = Board.get_sub_list(
+                [1, 2, 3, 4, 5, 6, 7, 8, 9], ex_elements_in_column)
 
             shuffle(required_elements)
             # Will always satisfy column, row and block condition!
@@ -36,14 +38,154 @@ class Board:
 
         return row_7, row_8, row_9
 
-
     @staticmethod
     def pathways_with_columns(lis, ex_row_1, ex_row_2, ex_row_3):
-        return
+        # lis is the row 4
+        d_row_5 = {}
+        d_row_6 = {}
+        block_1 = lis[:3]
+        block_2 = lis[3:6]
+        block_3 = lis[6:9]
+        # TODO Was this needed?
+        for i in range(3,9):
+            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
+            if Board.get_num_common_elements(block_1, col) >= 3:
+                if i//3 == 1:
+                    for elem in block_1:
+                        d_row_5[elem] = 3
+                        d_row_6[elem] = 2
+                    # Must go to block 3
+                elif i//3 == 2:
+                    for elem in block_1:
+                        d_row_5[elem] = 2
+                        d_row_6[elem] = 3
+                    # Must go to block 2
+        for i in range(9):
+            if i in [3,4,5]:
+                continue
+            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
+            if Board.get_num_common_elements(block_2, col) >= 3:
+                if i//3 == 0:
+                    for elem in block_2:
+                        d_row_5[elem] = 3
+                        d_row_6[elem] = 1
+                    # Must go to block 3
+                elif i//3 == 2:
+                    for elem in block_2:
+                        d_row_5[elem] = 1
+                        d_row_6[elem] = 3
+                    # Must go to block 1
+        for i in range(6):
+            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
+            if Board.get_num_common_elements(block_3, col) >= 3:
+                if i//3 == 0:
+                    for elem in block_3:
+                        d_row_5[elem] = 2
+                        d_row_6[elem] = 1
+                    # Must go to block 2
+                elif i//3 == 1:
+                    for elem in block_3:
+                        d_row_5[elem] = 1
+                        d_row_6[elem] = 2
+                    # Must go to block 1
+        
 
     @staticmethod
     def pathways(lis):
-        return
+        row_2 = []
+        row_3 = []
+        block_21 = []
+        block_22 = []
+        block_23 = []
+        block_31 = []
+        block_32 = []
+        block_33 = []
+        for i in range(len(lis)):
+            existing_block = (i//3)+1
+            # IN BLOCK 1
+            if existing_block == 1:
+                next_block = choice((2, 3))
+                if next_block == 2:
+                    if len(block_22) < 3 and len(block_33) < 3:
+                        next_block = 2
+                    else:
+                        next_block = 3
+                if next_block == 3:
+                    if len(block_23) < 3 and len(block_32) < 3:
+                        next_block = 3
+                    else:
+                        next_block = 2
+                # Now add to 3rd row
+                if next_block == 2:
+                    next_to_next_block = 3
+                elif next_block == 3:
+                    next_to_next_block = 2
+            # IN BLOCK 2
+            elif existing_block == 2:
+                next_block = choice((1, 3))
+                if next_block == 1:
+                    if len(block_21) < 3 and len(block_33) < 3:
+                        next_block = 1
+                    else:
+                        next_block = 3
+                if next_block == 3:
+                    if len(block_23) < 3:
+                        next_block = 3
+                    else:
+                        next_block = 1
+                # Now add to 3rd row
+                if next_block == 1:
+                    next_to_next_block = 3
+                elif next_block == 3:
+                    next_to_next_block = 1
+            # IN BLOCK 3
+            elif existing_block == 3:
+                next_block = choice((1, 2))
+                if next_block == 1:
+                    if len(block_21) < 3 and len(block_32) < 3:
+                        next_block = 1
+                    else:
+                        next_block = 2
+                if next_block == 2:
+                    if len(block_22) < 3 and len(block_31) < 3:
+                        next_block = 2
+                    else:
+                        next_block = 1
+                # Now add to 3rd row
+                if next_block == 2:
+                    next_to_next_block = 1
+                elif next_block == 1:
+                    next_to_next_block = 2
+
+            if next_block == 1:
+                block_21.append(lis[i])
+            elif next_block == 2:
+                block_22.append(lis[i])
+            elif next_block == 3:
+                block_23.append(lis[i])
+
+            if next_to_next_block == 1:
+                block_31.append(lis[i])
+            elif next_to_next_block == 2:
+                block_32.append(lis[i])
+            elif next_to_next_block == 3:
+                block_33.append(lis[i])
+
+        shuffle(block_21)
+        shuffle(block_22)
+        shuffle(block_23)
+        row_2.extend(block_21)
+        row_2.extend(block_22)
+        row_2.extend(block_23)
+
+        shuffle(block_31)
+        shuffle(block_32)
+        shuffle(block_33)
+        row_3.extend(block_31)
+        row_3.extend(block_32)
+        row_3.extend(block_33)
+
+        return row_2, row_3
 
     # Miscellaneous Functions
     @staticmethod
@@ -61,6 +203,14 @@ class Board:
         return lis
 
     @staticmethod
+    def get_num_common_elements(lis1, lis2):
+        count = 0
+        for elem in lis1:
+            if elem in lis2:
+                count += 1
+        return count
+
+    @staticmethod
     def set_column_in_array(existing_array, elements_list, column):
         # list is by default mutable type so call by reference
         i = 0
@@ -75,31 +225,35 @@ class Board:
     def get_sudoku_array():
         STANDARD_LIST = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         # Get first row
-        row_1 = STANDARD_LIST
+        row_1 = STANDARD_LIST.copy()
         shuffle(row_1)
+        print("GOT ROW1")
 
         # Get the 3 blocks through pathways
         row_2, row_3 = Board.pathways(row_1)
-
+        print("GOT ROW 2 AND 3")
         # Get the fourth row using randomization
         row_4 = []
         existing = []
         for i in range(9):
             required_list = Board.get_sub_list(
-                STANDARD_LIST, [row_1[i], row_2[i], row_3[i]])
+                STANDARD_LIST.copy(), [row_1[i], row_2[i], row_3[i]])
             new_elem = choice(required_list)
             while new_elem in existing:
                 new_elem = choice(required_list)
             row_4.insert(i, new_elem)
             existing.append(new_elem)
 
+        print("GOT ROW 4")
         # Using pathways with column condition for row 5 and row 6
         row_5, row_6 = Board.pathways_with_columns(row_4, row_1, row_2, row_3)
+        # row_5, row_6 = [1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]
 
         # Using method of remaining numbers to determine row 7,8 and 9
-        row_7, row_8, row_9 = Board.get_final_3_blocks(
+        row_7, row_8, row_9 = Board.get_final_three_blocks(
             row_1, row_2, row_3, row_4, row_5, row_6)
 
+        print("GOT ROW 7,8,9")
         final = [row_1, row_2, row_3, row_4, row_5, row_6, row_7, row_8, row_9]
         return final
 
