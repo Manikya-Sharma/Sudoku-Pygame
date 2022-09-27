@@ -24,6 +24,7 @@ class Board:
         row_8 = []
         row_9 = []
         array = [row_7, row_8, row_9]
+        vertical_array = []  # To check the row condition
 
         for i in range(9):
             ex_elements_in_column = Board.access_column([ex_row_1, ex_row_2,
@@ -31,64 +32,127 @@ class Board:
                                                          ex_row_5, ex_row_6], i)
             required_elements = Board.get_sub_list(
                 [1, 2, 3, 4, 5, 6, 7, 8, 9], ex_elements_in_column)
+            # Will always satisfy column and block condition
 
             shuffle(required_elements)
-            # Will always satisfy column, row and block condition!
+            # Could have used a better approach than looping the same shuffle,
+            # but since maximum permutations in the last 3 rows is 6, so it
+            # will not affect efficiency too  much.
+
+            for _ in range(3):
+                for j in range(3):
+                    if required_elements[j] in array[j]:
+                        shuffle(required_elements)
+
             Board.set_column_in_array(array, required_elements, i)
 
         return row_7, row_8, row_9
 
     @staticmethod
     def pathways_with_columns(lis, ex_row_1, ex_row_2, ex_row_3):
-        # lis is the row 4
-        d_row_5 = {}
-        d_row_6 = {}
-        block_1 = lis[:3]
-        block_2 = lis[3:6]
-        block_3 = lis[6:9]
-        # TODO Was this needed?
-        for i in range(3,9):
-            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-            if Board.get_num_common_elements(block_1, col) >= 3:
-                if i//3 == 1:
-                    for elem in block_1:
-                        d_row_5[elem] = 3
-                        d_row_6[elem] = 2
-                    # Must go to block 3
-                elif i//3 == 2:
-                    for elem in block_1:
-                        d_row_5[elem] = 2
-                        d_row_6[elem] = 3
-                    # Must go to block 2
+        # We have to consider all 3 conditions (block, row and column) simultaneously
+        block_11 = lis[0:3]
+        block_12 = lis[3:6]
+        block_13 = lis[6:9]
+        block_21 = {}
+        block_22 = {}
+        block_23 = {}
+        block_31 = {}
+        block_32 = {}
+        block_33 = {}
+
+        row_2 = []
+        row_3 = []
+
         for i in range(9):
-            if i in [3,4,5]:
-                continue
-            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-            if Board.get_num_common_elements(block_2, col) >= 3:
-                if i//3 == 0:
-                    for elem in block_2:
-                        d_row_5[elem] = 3
-                        d_row_6[elem] = 1
-                    # Must go to block 3
-                elif i//3 == 2:
-                    for elem in block_2:
-                        d_row_5[elem] = 1
-                        d_row_6[elem] = 3
-                    # Must go to block 1
-        for i in range(6):
-            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-            if Board.get_num_common_elements(block_3, col) >= 3:
-                if i//3 == 0:
-                    for elem in block_3:
-                        d_row_5[elem] = 2
-                        d_row_6[elem] = 1
-                    # Must go to block 2
-                elif i//3 == 1:
-                    for elem in block_3:
-                        d_row_5[elem] = 1
-                        d_row_6[elem] = 2
-                    # Must go to block 1
-        
+            current_block = i//3+1
+            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3, lis], i)
+            # Column condition
+            required_elements = Board.get_sub_list([1,2,3,4,5,6,7,8,9], col)
+            el = choice(required_elements)
+            # Row condition
+            while (el in block_21.keys() or el in block_22.keys() or el in block_23.keys()):
+                el = choice(required_elements)
+            # Block condition
+            if current_block == 1:
+                # For row 2 which is row 5 in rest of program
+                while el in block_31.keys():
+                    el = choice(required_elements)
+                block_21[el] = i
+                # For row 3 which is row 6 in rest of program
+                if el in block_12 or el in block_32:
+                    block_33[el] = 6   #* We will check about row 3 later on, so just add
+                elif el in block_13 or el in block_33:
+                    block_32[el] = 3
+                else:
+                    to_block = choice((2,3))
+                    if to_block == 2:
+                        block_32[el] = 3
+                    else:
+                        block_33[el] = 6
+            elif current_block == 2:
+                while el in block_32.keys():
+                    el = choice(required_elements)
+                block_22[el] = i
+                if el in block_11 or el in block_31:
+                    block_33[el] = 6
+                elif el in block_13 or el in block_33:
+                    block_31[el] = 0
+                else:
+                    to_block = choice((1,3))
+                    if to_block == 1:
+                        block_31[el] = 0
+                    else:
+                        block_33[el] = 6
+            elif current_block == 3:
+                while el in block_33.keys():
+                    el = choice(required_elements)
+                block_23[el] = i
+                if el in block_12 or el in block_32:
+                    block_31[el] = 0
+                elif el in block_11 or el in block_31:
+                    block_32[el] = 3
+                else:
+                    to_block = choice((1,2))
+                    if to_block == 1:
+                        block_31[el] = 0
+                    else:
+                        block_32[el] = 3
+
+        for el, ind in block_21.items():
+            row_2.insert(ind, el)
+        for el, ind in block_22.items():
+            row_2.insert(ind, el)
+        for el, ind in block_23.items():
+            row_2.insert(ind, el)
+
+        # Now for row 3
+        for el in block_31.keys():
+            for i in range(3):
+                col = Board.access_column([ex_row_1, ex_row_2, ex_row_3, lis, row_2], i)
+                if el not in col:
+                    block_31[el] = i # Update the index
+        for el in block_32.keys():
+            for i in range(3,6):
+                col = Board.access_column([ex_row_1, ex_row_2, ex_row_3, lis, row_2], i)
+                if el not in col:
+                    block_32[el] = i # Update the index
+        for el in block_33.keys():
+            for i in range(6,9):
+                col = Board.access_column([ex_row_1, ex_row_2, ex_row_3, lis, row_2], i)
+                if el not in col:
+                    block_33[el] = i # Update the index
+        print(block_31)
+        print(block_32)
+        print(block_33)
+        for el, ind in block_31.items():
+            row_3.insert(ind, el)
+        for el, ind in block_32.items():
+            row_3.insert(ind, el)
+        for el, ind in block_33.items():
+            row_3.insert(ind, el)
+
+        return row_2,row_3
 
     @staticmethod
     def pathways(lis):
@@ -220,7 +284,15 @@ class Board:
             except IndexError:
                 row.insert(column, elements_list[i])
             i += 1
+    @staticmethod
+    def remove_duplicates_from_dict(dic):
+        new_dic = {}
+        for key, val in dic.items():
+            if val not in new_dic.values():
+                new_dic[key] = val
+        return new_dic
 
+    # Final methods
     @staticmethod
     def get_sudoku_array():
         STANDARD_LIST = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -232,22 +304,27 @@ class Board:
         # Get the 3 blocks through pathways
         row_2, row_3 = Board.pathways(row_1)
         print("GOT ROW 2 AND 3")
+
         # Get the fourth row using randomization
-        row_4 = []
-        existing = []
-        for i in range(9):
-            required_list = Board.get_sub_list(
-                STANDARD_LIST.copy(), [row_1[i], row_2[i], row_3[i]])
-            new_elem = choice(required_list)
-            while new_elem in existing:
-                new_elem = choice(required_list)
-            row_4.insert(i, new_elem)
-            existing.append(new_elem)
+        row_4 = STANDARD_LIST.copy()
+        shuffle(row_4)
+        # This process might be time consuming, so try an alternative if-possible
+        valid = False
+        while not valid:
+            for i in range(9):
+                column = Board.access_column([row_1, row_2, row_3], i)
+                if row_4[i] in column:
+                    shuffle(row_4)
+                    break
+            else:
+                valid = True
+
 
         print("GOT ROW 4")
         # Using pathways with column condition for row 5 and row 6
         row_5, row_6 = Board.pathways_with_columns(row_4, row_1, row_2, row_3)
-        # row_5, row_6 = [1,2,3,4,5,6,7,8,9],[1,2,3,4,5,6,7,8,9]
+
+        print("GOT ROW 5 and 6")
 
         # Using method of remaining numbers to determine row 7,8 and 9
         row_7, row_8, row_9 = Board.get_final_three_blocks(
@@ -255,6 +332,7 @@ class Board:
 
         print("GOT ROW 7,8,9")
         final = [row_1, row_2, row_3, row_4, row_5, row_6, row_7, row_8, row_9]
+        print(final)
         return final
 
     @staticmethod
