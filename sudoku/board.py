@@ -8,6 +8,8 @@ class Board:
     """
     *    METHOD OF PATHWAYS
         To get 3 blocks satisfying the block, row and column condition
+        only two possible pathways are possible for an element
+        (ignoring internal arrangements)
 
     *     1.                    2.
 
@@ -20,186 +22,237 @@ class Board:
 
     @staticmethod
     def get_final_three_blocks(ex_row_1, ex_row_2, ex_row_3, ex_row_4, ex_row_5, ex_row_6):
-        row_7 = []
-        row_8 = []
-        row_9 = []
-        array = [row_7, row_8, row_9]
+        keep_trying = True
+        while keep_trying:
+            row_7 = []
+            row_8 = []
+            row_9 = []
+            array = [row_7, row_8, row_9]
+            for i in range(9):   # The columns
+                existing_in_column = Board.access_column(
+                    [ex_row_1, ex_row_2, ex_row_3, ex_row_4, ex_row_5, ex_row_6], i)
 
-        for i in range(9):
-            ex_elements_in_column = Board.access_column([ex_row_1, ex_row_2,
-                                                         ex_row_3, ex_row_4,
-                                                         ex_row_5, ex_row_6], i)
-            required_elements = Board.get_sub_list(
-                [1, 2, 3, 4, 5, 6, 7, 8, 9], ex_elements_in_column)
-            # Will always satisfy column and block condition
-
-            required_elements_dic = {}
-            for k in range(3):
-                available_elements_row = Board.get_sub_list(
-                    [1,2,3,4,5,6,7,8,9], array[k])
-                for j in available_elements_row:
-                    if j in required_elements:
-                        required_elements_dic[j] = k
+                available_elements = Board.get_sub_list(
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9], existing_in_column)
+                valid = False
+                count = 0
+                while not valid:
+                    shuffle(available_elements)
+                    for j in range(3):
+                        if available_elements[j] in array[j]:
+                            # print(available_elements, array[j])
+                            # input()
+                            valid = False
+                            count += 1
+                            break
+                    else:
+                        valid = True
+                        Board.set_column_in_array(array, available_elements, i)
+                    # Too many iterations, maybe wrong choices were made initially
+                    if count >= 1000:
+                        # print("Thats enough!")
+                        # Could have used better approach by thinking several cases
+                        # but as permutations are comparatively less, so its fine
+                        keep_trying = True
+                        break_for = True
                         break
+                    else:
+                        break_for = False
                 else:
-                    continue
-                break
-            final_elements = []
-            for key, value in required_elements_dic.items():
-                final_elements.insert(value, key)
-            Board.set_column_in_array(array, final_elements, i)
-
+                    keep_trying = False
+                if break_for:
+                    break
         return row_7, row_8, row_9
 
     @staticmethod
     def pathways_with_columns(lis, ex_row_1, ex_row_2, ex_row_3):
         # We have to consider all 3 conditions (block, row and column) simultaneously
-        existing = {1:lis[0:3], 2:lis[3:6], 3:lis[6:9]}
-        next_ones = {1:[], 2:[], 3:[]}
-        next_to_next_ones = {1:[], 2:[], 3:[]}
+        valid_blocks = False
+        while not valid_blocks:
+            existing = {1: lis[0:3], 2: lis[3:6], 3: lis[6:9]}
+            next_ones = {1: [], 2: [], 3: []}
+            next_to_next_ones = {1: [], 2: [], 3: []}
 
-        row_5 = []
-        row_6 = []
+            row_5 = []
+            row_6 = []
 
-        for existing_block, elements_list in existing.items():
-            for element in elements_list:
-                # If in block 1
-                if existing_block == 1:
-                    next_block = choice((2,3))
-                    if next_block == 2:
-                        count_invalid_places = 0
-                        for i in range(3, 6):
-                            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-                            if element in col:
-                                count_invalid_places += 1
-                        if (count_invalid_places >= 3 or
-                            len(next_ones[2]) >=3 or
-                            len(next_to_next_ones[3])>=3):    # Nowhere possible
-                            next_ones[3].append(element)
-                            next_to_next_ones[2].append(element)
-                            continue
-                        else:
-                            next_ones[2].append(element)
-                            next_to_next_ones[3].append(element)
-                            continue
-                    if next_block == 3:
-                        count_invalid_places = 0
-                        for i in range(6, 9):
-                            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-                            if element in col:
-                                count_invalid_places += 1
-                        if (count_invalid_places >= 3 or
-                            len(next_ones[3])>=3 or
-                            len(next_to_next_ones[2])>=3):    # Nowhere possible
-                            next_ones[2].append(element)
-                            next_to_next_ones[3].append(element)
-                            continue
-                        else:
-                            next_ones[3].append(element)
-                            next_to_next_ones[2].append(element)
-                            continue
-                # If in block 2
-                if existing_block == 2:
-                    next_block = choice((1,3))
-                    if next_block == 1:
-                        count_invalid_places = 0
-                        for i in range(0, 3):
-                            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-                            if element in col:
-                                count_invalid_places += 1
-                        if (count_invalid_places >= 3 or
-                            len(next_ones[1])>=3 or
-                            len(next_to_next_ones[3])>=3):    # Nowhere possible
-                            next_ones[3].append(element)
-                            next_to_next_ones[1].append(element)
-                            continue
-                        else:
-                            next_ones[1].append(element)
-                            next_to_next_ones[3].append(element)
-                            continue
-                    if next_block == 3:
-                        count_invalid_places = 0
-                        for i in range(6, 9):
-                            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-                            if element in col:
-                                count_invalid_places += 1
-                        if (count_invalid_places >= 3 or
-                            len(next_ones[3])>= 3 or
-                            len(next_to_next_ones[1])>=3):    # Nowhere possible
-                            next_ones[1].append(element)
-                            next_to_next_ones[3].append(element)
-                            continue
-                        else:
-                            next_ones[3].append(element)
-                            next_to_next_ones[1].append(element)
-                            continue
-                # If in block 3
-                if existing_block == 3:
-                    next_block = choice((1,2))
-                    if next_block == 1:
-                        count_invalid_places = 0
-                        for i in range(0, 3):
-                            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-                            if element in col:
-                                count_invalid_places += 1
-                        if (count_invalid_places >= 3 or
-                            len(next_ones[1])>=3 or
-                            len(next_to_next_ones[2])>=3):    # Nowhere possible
-                            next_ones[2].append(element)
-                            next_to_next_ones[1].append(element)
-                            continue
-                        else:
-                            next_ones[1].append(element)
-                            next_to_next_ones[2].append(element)
-                            continue
-                    if next_block == 2:
-                        count_invalid_places = 0
-                        for i in range(3, 6):
-                            col = Board.access_column([ex_row_1, ex_row_2, ex_row_3], i)
-                            if element in col:
-                                count_invalid_places += 1
-                        if (count_invalid_places >= 3 or
-                            len(next_ones[2])>=3 or
-                            len(next_to_next_ones[1])>=3):    # Nowhere possible
-                            next_ones[1].append(element)
-                            next_to_next_ones[2].append(element)
-                            continue
-                        else:
-                            next_ones[2].append(element)
-                            next_to_next_ones[1].append(element)
-                            continue
+            for existing_block, elements_list in existing.items():
+                for element in elements_list:
+                    # If in block 1
+                    if existing_block == 1:
+                        next_block = choice((2, 3))
+                        if next_block == 2:
+                            count_invalid_places = 0
+                            for i in range(3, 6):
+                                col = Board.access_column(
+                                    [ex_row_1, ex_row_2, ex_row_3], i)
+                                if element in col:
+                                    count_invalid_places += 1
+                            if (count_invalid_places >= 3 or
+                                len(next_ones[2]) >= 3 or
+                                    len(next_to_next_ones[3]) >= 3):    # Nowhere possible
+                                next_ones[3].append(element)
+                                next_to_next_ones[2].append(element)
+                                continue
+                            else:
+                                next_ones[2].append(element)
+                                next_to_next_ones[3].append(element)
+                                continue
+                        if next_block == 3:
+                            count_invalid_places = 0
+                            for i in range(6, 9):
+                                col = Board.access_column(
+                                    [ex_row_1, ex_row_2, ex_row_3], i)
+                                if element in col:
+                                    count_invalid_places += 1
+                            if (count_invalid_places >= 3 or
+                                len(next_ones[3]) >= 3 or
+                                    len(next_to_next_ones[2]) >= 3):    # Nowhere possible
+                                next_ones[2].append(element)
+                                next_to_next_ones[3].append(element)
+                                continue
+                            else:
+                                next_ones[3].append(element)
+                                next_to_next_ones[2].append(element)
+                                continue
+                    # If in block 2
+                    if existing_block == 2:
+                        next_block = choice((1, 3))
+                        if next_block == 1:
+                            count_invalid_places = 0
+                            for i in range(0, 3):
+                                col = Board.access_column(
+                                    [ex_row_1, ex_row_2, ex_row_3], i)
+                                if element in col:
+                                    count_invalid_places += 1
+                            if (count_invalid_places >= 3 or
+                                len(next_ones[1]) >= 3 or
+                                    len(next_to_next_ones[3]) >= 3):    # Nowhere possible
+                                next_ones[3].append(element)
+                                next_to_next_ones[1].append(element)
+                                continue
+                            else:
+                                next_ones[1].append(element)
+                                next_to_next_ones[3].append(element)
+                                continue
+                        if next_block == 3:
+                            count_invalid_places = 0
+                            for i in range(6, 9):
+                                col = Board.access_column(
+                                    [ex_row_1, ex_row_2, ex_row_3], i)
+                                if element in col:
+                                    count_invalid_places += 1
+                            if (count_invalid_places >= 3 or
+                                len(next_ones[3]) >= 3 or
+                                    len(next_to_next_ones[1]) >= 3):    # Nowhere possible
+                                next_ones[1].append(element)
+                                next_to_next_ones[3].append(element)
+                                continue
+                            else:
+                                next_ones[3].append(element)
+                                next_to_next_ones[1].append(element)
+                                continue
+                    # If in block 3
+                    if existing_block == 3:
+                        next_block = choice((1, 2))
+                        if next_block == 1:
+                            count_invalid_places = 0
+                            for i in range(0, 3):
+                                col = Board.access_column(
+                                    [ex_row_1, ex_row_2, ex_row_3], i)
+                                if element in col:
+                                    count_invalid_places += 1
+                            if (count_invalid_places >= 3 or
+                                len(next_ones[1]) >= 3 or
+                                    len(next_to_next_ones[2]) >= 3):    # Nowhere possible
+                                next_ones[2].append(element)
+                                next_to_next_ones[1].append(element)
+                                continue
+                            else:
+                                next_ones[1].append(element)
+                                next_to_next_ones[2].append(element)
+                                continue
+                        if next_block == 2:
+                            count_invalid_places = 0
+                            for i in range(3, 6):
+                                col = Board.access_column(
+                                    [ex_row_1, ex_row_2, ex_row_3], i)
+                                if element in col:
+                                    count_invalid_places += 1
+                            if (count_invalid_places >= 3 or
+                                len(next_ones[2]) >= 3 or
+                                    len(next_to_next_ones[1]) >= 3):    # Nowhere possible
+                                next_ones[1].append(element)
+                                next_to_next_ones[2].append(element)
+                                continue
+                            else:
+                                next_ones[2].append(element)
+                                next_to_next_ones[1].append(element)
+                                continue
 
-        # Now we need to only shuffle the blocks ensuring colimn condition
-        # Row 5
-        for j in range(3):   # A block
-            valid = False
-            while not valid:
-                shuffle(next_ones[j+1])
-                for i in range(3):   # Each element of block
-                    if (next_ones[j+1][i] in
-                        Board.access_column([ex_row_1, ex_row_2, ex_row_3],(j)*3+i)):
-                        valid = False
+            # Now we need to only shuffle the blocks ensuring column condition
+
+            # Row 5
+            for j in range(3):   # A block
+                valid = False
+                count = 0
+                while not valid:
+                    shuffle(next_ones[j+1])
+                    for i in range(3):   # Each element of block
+                        if (next_ones[j+1][i] in
+                                Board.access_column([ex_row_1, ex_row_2, ex_row_3], (j)*3+i)):
+                            valid = False
+                            count += 1
+                            break
+                    else:
+                        valid = True
+                    if count >= 1000:  # Maybe some wring choices initially
+                        break_for = True
                         break
+                    else:
+                        break_for = False
+                if break_for:
+                    valid_blocks = False
+                    break_complete = True
+                    break
+                # Out of loop must be valid
                 else:
-                    valid = True
-            # Out of loop must be valid
-            row_5.extend(next_ones[j+1])
+                    break_complete = False
+                    row_5.extend(next_ones[j+1])
+            if break_complete:
+                break
 
-        # Row 6
-        for j in range(3):   # A block
-            valid = False
-            while not valid:
-                shuffle(next_to_next_ones[j+1])
-                for i in range(3):   # Each element of block
-                    if (next_to_next_ones[j+1][i] in
-                        Board.access_column([ex_row_1, ex_row_2, ex_row_3],(j)*3+i)):
-                        valid = False
+            # Row 6
+            for j in range(3):   # A block
+                valid = False
+                count = 0
+                while not valid:
+                    shuffle(next_to_next_ones[j+1])
+                    for i in range(3):   # Each element of block
+                        if (next_to_next_ones[j+1][i] in
+                                Board.access_column([ex_row_1, ex_row_2, ex_row_3], (j)*3+i)):
+                            valid = False
+                            count += 1
+                            break
+                    else:
+                        valid = True
+                    if count >= 1000:
+                        break_for = True
                         break
+                    else:
+                        break_for = False
+                if break_for:
+                    valid_blocks = False
+                    break_complete = True
+                    break
+                # Out of loop must be valid
                 else:
-                    valid = True
-            # Out of loop must be valid
-            row_6.extend(next_to_next_ones[j+1])
-
+                    break_complete = False
+                    row_6.extend(next_to_next_ones[j+1])
+            if break_complete:
+                break
+            else:
+                valid_blocks = True   # Finally, must be correct
         return row_5, row_6
 
     @staticmethod
@@ -329,6 +382,7 @@ class Board:
         for row in existing_array:
             row.insert(column, elements_list[i])
             i += 1
+
     @staticmethod
     def remove_duplicates_from_dict(dic):
         new_dic = {}
@@ -341,37 +395,62 @@ class Board:
     @staticmethod
     def get_sudoku_array():
         STANDARD_LIST = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-        # Get first row
-        row_1 = STANDARD_LIST.copy()
-        shuffle(row_1)
-        print("GOT ROW1")
+        valid_columns = False
+        while not valid_columns:
+            # Get first row
+            row_1 = STANDARD_LIST.copy()
+            shuffle(row_1)
+            print("GOT ROW1")
 
-        # Get the 3 blocks through pathways
-        row_2, row_3 = Board.pathways(row_1)
-        print("GOT ROW 2 AND 3")
+            # Get the 3 blocks through pathways
+            row_2, row_3 = Board.pathways(row_1)
+            print("GOT ROW 2 AND 3")
 
-        # Get the fourth row using randomization
-        row_4 = STANDARD_LIST.copy()
-        shuffle(row_4)
-        # This process might be time consuming, so try an alternative if-possible
-        valid = False
-        while not valid:
+            # Get the fourth row using randomization
+            row_4 = STANDARD_LIST.copy()
+            shuffle(row_4)
+            # This process might be time consuming, so try an alternative if-possible
+            valid = False
+            while not valid:
+                for i in range(9):
+                    column = Board.access_column([row_1, row_2, row_3], i)
+                    if row_4[i] in column:
+                        shuffle(row_4)
+                        break
+                else:
+                    valid = True
+
+            print("GOT ROW 4")
+
+            # Using pathways with column condition for row 5 and row 6
+            row_5, row_6 = Board.pathways_with_columns(
+                row_4, row_1, row_2, row_3)
+
+            print("GOT ROW 5 and 6")
+            print(row_1, row_2, row_3, row_4, row_5, row_6)
+
+            # Now check that no two columns are same
+            # (Because in such case, last 3 rows cant be filled)
             for i in range(9):
-                column = Board.access_column([row_1, row_2, row_3], i)
-                if row_4[i] in column:
-                    shuffle(row_4)
+                column_1 = Board.access_column(
+                    [row_1, row_2, row_3, row_4, row_5, row_6], i)
+                for j in range(9):
+                    if i == j:
+                        continue
+                    column_2 = Board.access_column(
+                        [row_1, row_2, row_3, row_4, row_5, row_6], j)
+                    # All same
+                    if Board.get_num_common_elements(column_1, column_2) >= 6:
+                        valid_columns = False
+                        break_for = True
+                        break
+                    else:
+                        break_for = False
+                if break_for:
                     break
             else:
-                valid = True
+                valid_columns = True
 
-
-        print("GOT ROW 4")
-        # Using pathways with column condition for row 5 and row 6
-        row_5, row_6 = Board.pathways_with_columns(row_4, row_1, row_2, row_3)
-
-        print("GOT ROW 5 and 6")
-
-        print(row_1, row_2, row_3, row_4, row_5, row_6)
         # Using method of remaining numbers to determine row 7,8 and 9
         row_7, row_8, row_9 = Board.get_final_three_blocks(
             row_1, row_2, row_3, row_4, row_5, row_6)
