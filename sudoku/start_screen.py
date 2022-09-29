@@ -54,6 +54,5 @@ class Start:
         else:
             clicked = False
         if clicked == "START":
-            print("Clicked")
             return False
         return True

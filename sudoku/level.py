@@ -46,9 +46,18 @@ class Level:
                 continue
             cell.check_correctness()
         Board.check_completeness()
+        count_green = 0
+        for cell in Cell.existing_cells:
+            if cell.is_green:
+                count_green += 1
+        if count_green >= 81:
+            return True
+        else:
+            return False
 
     def play(self):
         self.get_input()
         self.draw_objects()
-        self.update()
+        if self.update():
+            return False
         return True   # TODO Return False on ending

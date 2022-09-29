@@ -43,15 +43,15 @@ class Constants:
             self.get_defaults()
 
     def create_defaults(self):
-        with open("./data/settings.bin", 'xb') as file:
+        with open("../data/settings.bin", 'xb') as file:
             pickle.dump(Constants.d, file)
 
     def over_write_defaults(self):
-        with open("./data/settings.bin", 'wb') as file:
+        with open("../data/settings.bin", 'wb') as file:
             pickle.dump(Constants.d, file)
 
     def get_defaults(self):
-        with open("./data/settings.bin", 'rb') as file:
+        with open("../data/settings.bin", 'rb') as file:
             data = pickle.load(file)
         self.d = data
 

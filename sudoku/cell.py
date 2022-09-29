@@ -26,26 +26,7 @@ class Cell:
         self.is_green = False  # For completed rows/columns
         Cell.existing_cells.append(self)
 
-    def check_correctness(self):
-        for cell in Cell.existing_cells:
-            if cell == self or cell.number == 0:
-                continue
-            if (cell.row == self.row or cell.column == self.column) and (cell.number == self.number):
-                self.is_red = True
-                break
-        else:
-            self.is_red = False
-
-    def answer(self, number):
-        if not self.is_default and number != 0:
-            self.is_answered = True
-            self.number = number
-        elif number == 0:
-            self.is_answered = False
-            self.number = 0
-
     def draw(self, screen):
-
         # Cell BG
         if self.is_red:
             color = (255, 0, 0)
@@ -84,6 +65,24 @@ class Cell:
                               self.c.d["TOP_BOTTOM_GAP"] +
                               (self.row-1)*(self.side+self.c.d["PADDING"]),
                               self.side, self.side], 2)
+
+    def answer(self, number):
+        if not self.is_default and number != 0:
+            self.is_answered = True
+            self.number = number
+        elif number == 0:
+            self.is_answered = False
+            self.number = 0
+
+    def check_correctness(self):
+        for cell in Cell.existing_cells:
+            if cell == self or cell.number == 0:
+                continue
+            if (cell.row == self.row or cell.column == self.column) and (cell.number == self.number):
+                self.is_red = True
+                break
+        else:
+            self.is_red = False
 
     @classmethod
     def make_green(cls, row=None, column=None):

@@ -20,6 +20,7 @@ class Board:
     *     []   []   [•]         []   [•]   []
     """
 
+    # Initialization Functions
     @staticmethod
     def get_final_three_blocks(ex_row_1, ex_row_2, ex_row_3, ex_row_4, ex_row_5, ex_row_6):
         keep_trying = True
@@ -40,8 +41,6 @@ class Board:
                     shuffle(available_elements)
                     for j in range(3):
                         if available_elements[j] in array[j]:
-                            # print(available_elements, array[j])
-                            # input()
                             valid = False
                             count += 1
                             break
@@ -352,45 +351,6 @@ class Board:
 
         return row_2, row_3
 
-    # Miscellaneous Functions
-    @staticmethod
-    def get_sub_list(given_list, remove_list):
-        for elem in remove_list:
-            if elem in given_list:
-                given_list.remove(elem)
-        return given_list
-
-    @staticmethod
-    def access_column(array, column):
-        lis = []
-        for row in array:
-            lis.append(row[column])
-        return lis
-
-    @staticmethod
-    def get_num_common_elements(lis1, lis2):
-        count = 0
-        for elem in lis1:
-            if elem in lis2:
-                count += 1
-        return count
-
-    @staticmethod
-    def set_column_in_array(existing_array, elements_list, column):
-        # list is by default mutable type so call by reference
-        i = 0
-        for row in existing_array:
-            row.insert(column, elements_list[i])
-            i += 1
-
-    @staticmethod
-    def remove_duplicates_from_dict(dic):
-        new_dic = {}
-        for key, val in dic.items():
-            if val not in new_dic.values():
-                new_dic[key] = val
-        return new_dic
-
     # Final methods
     @staticmethod
     def get_sudoku_array():
@@ -400,11 +360,9 @@ class Board:
             # Get first row
             row_1 = STANDARD_LIST.copy()
             shuffle(row_1)
-            print("GOT ROW1")
 
             # Get the 3 blocks through pathways
             row_2, row_3 = Board.pathways(row_1)
-            print("GOT ROW 2 AND 3")
 
             # Get the fourth row using randomization
             row_4 = STANDARD_LIST.copy()
@@ -420,14 +378,9 @@ class Board:
                 else:
                     valid = True
 
-            print("GOT ROW 4")
-
             # Using pathways with column condition for row 5 and row 6
             row_5, row_6 = Board.pathways_with_columns(
                 row_4, row_1, row_2, row_3)
-
-            print("GOT ROW 5 and 6")
-            print(row_1, row_2, row_3, row_4, row_5, row_6)
 
             # Now check that no two columns are same
             # (Because in such case, last 3 rows cant be filled)
@@ -455,9 +408,7 @@ class Board:
         row_7, row_8, row_9 = Board.get_final_three_blocks(
             row_1, row_2, row_3, row_4, row_5, row_6)
 
-        print("GOT ROW 7,8,9")
         final = [row_1, row_2, row_3, row_4, row_5, row_6, row_7, row_8, row_9]
-        print(final)
         return final
 
     @staticmethod
@@ -490,6 +441,7 @@ class Board:
         for cell in Cell.existing_cells:
             cell.draw(screen)
 
+    # Functions which work throughout
     @staticmethod
     def draw_template(screen):
         c = Constants()
@@ -602,3 +554,42 @@ class Board:
                 Cell.make_green(column=column)
             else:
                 Cell.remove_green(column=column)
+
+    # Miscellaneous Functions
+    @staticmethod
+    def get_sub_list(given_list, remove_list):
+        for elem in remove_list:
+            if elem in given_list:
+                given_list.remove(elem)
+        return given_list
+
+    @staticmethod
+    def access_column(array, column):
+        lis = []
+        for row in array:
+            lis.append(row[column])
+        return lis
+
+    @staticmethod
+    def get_num_common_elements(lis1, lis2):
+        count = 0
+        for elem in lis1:
+            if elem in lis2:
+                count += 1
+        return count
+
+    @staticmethod
+    def set_column_in_array(existing_array, elements_list, column):
+        # list is by default mutable type so call by reference
+        i = 0
+        for row in existing_array:
+            row.insert(column, elements_list[i])
+            i += 1
+
+    @staticmethod
+    def remove_duplicates_from_dict(dic):
+        new_dic = {}
+        for key, val in dic.items():
+            if val not in new_dic.values():
+                new_dic[key] = val
+        return new_dic
