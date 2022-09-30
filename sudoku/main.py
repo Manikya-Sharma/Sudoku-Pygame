@@ -1,5 +1,5 @@
 
-# TODO: Add Block Condition
+# TODO: Make end screen, add option to show answer after lose, also settings for making defaults, better dark theme colors choice...
 
 import pygame
 from settings import Constants

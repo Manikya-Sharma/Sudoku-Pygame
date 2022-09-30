@@ -1,6 +1,7 @@
 import pygame
 from random import shuffle, choice
 from cell import Cell
+from loading_screen import Loading
 from settings import Constants
 
 
@@ -353,7 +354,9 @@ class Board:
 
     # Final methods
     @staticmethod
-    def get_sudoku_array():
+    def get_sudoku_array(screen):
+        load = Loading(screen, 5)
+        load.draw_and_update()
         STANDARD_LIST = [1, 2, 3, 4, 5, 6, 7, 8, 9]
         valid_columns = False
         while not valid_columns:
@@ -361,8 +364,15 @@ class Board:
             row_1 = STANDARD_LIST.copy()
             shuffle(row_1)
 
+            load.set_zero()
+            load.increment_loading()
+            load.draw_and_update()
+
             # Get the 3 blocks through pathways
             row_2, row_3 = Board.pathways(row_1)
+
+            load.increment_loading()
+            load.draw_and_update()
 
             # Get the fourth row using randomization
             row_4 = STANDARD_LIST.copy()
@@ -378,9 +388,15 @@ class Board:
                 else:
                     valid = True
 
+            load.increment_loading()
+            load.draw_and_update()
+
             # Using pathways with column condition for row 5 and row 6
             row_5, row_6 = Board.pathways_with_columns(
                 row_4, row_1, row_2, row_3)
+
+            load.increment_loading()
+            load.draw_and_update()
 
             # Now check that no two columns are same
             # (Because in such case, last 3 rows cant be filled)
@@ -408,18 +424,20 @@ class Board:
         row_7, row_8, row_9 = Board.get_final_three_blocks(
             row_1, row_2, row_3, row_4, row_5, row_6)
 
+        load.increment_loading()
+        load.draw_and_update()
+
         final = [row_1, row_2, row_3, row_4, row_5, row_6, row_7, row_8, row_9]
         return final
 
     @staticmethod
-    def initialize_cells():
+    def initialize_cells(screen):
         # Number of defaults
         c = Constants()
         num_given = c.d["DIFFICULTY"]
         num_done = 0
 
-        # ? # Allocating numbers
-        final = Board.get_sudoku_array()
+        final = Board.get_sudoku_array(screen)
         # Creating the corresponding cells
         i = 1
         while i <= 9:

@@ -6,7 +6,7 @@ from cell import Cell
 class Level:
     def __init__(self):
         self.screen = pygame.display.get_surface()
-        Board.initialize_cells()
+        Board.initialize_cells(self.screen)
 
     def get_input(self):
         if pygame.mouse.get_pressed()[0]:
