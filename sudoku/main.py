@@ -39,5 +39,11 @@ class Game:
 
 
 if __name__ == "__main__":
+    # while True:
+        # try:
     game = Game()
     game.play()
+        # except:
+        #     print("ERROR")  #!For testing
+        # else:
+        #     break
